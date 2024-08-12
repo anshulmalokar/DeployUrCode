@@ -20,7 +20,7 @@ export class AwsService{
     public async upload(file: string | Buffer){
         const putObjectCommand = new PutObjectCommand({
             Bucket: process.env.AWS_BUCKET_NAME as string,
-            Key: `__output/${process.env.SLUG}/${file}`,
+            Key: `__output/${process.env.PROJECT_ID}/${file}`,
             Body: fs.createReadStream(file),
             ContentType: ms.lookup(file as string) as unknown as string
         });
