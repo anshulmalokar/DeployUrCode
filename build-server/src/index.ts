@@ -4,14 +4,24 @@ import fs from "fs";
 import { AwsService } from "./service/AwsService";
 
 async function init(){
-    console.log("Starting the build process");
+    console.log("Starting the build process....");
 
-    // Code for building the project.
     const code_dir = path.join(__dirname,"../output");
+    console.log(code_dir);
+    const files = fs.existsSync(code_dir);
+    console.log(files === true ? "The directory exists" : "The directory doesnot exits");
     const build_process = exec(`cd ${code_dir} && npm install && npm run build`); 
-       
+    
+    exec('ls -al & cat .env', (err, stdout, stderr) => {
+        if (err) {
+          return;
+        }
+        console.log(`stdout: ${stdout}`);
+        console.log(`stderr: ${stderr}`);
+      });
+
     build_process.stdout?.on('data',(data) => {
-        console.log(data.toString());
+        console.log("Data " + data.toString());
     });
 
     build_process.stdout?.on('error',(data) => {
@@ -20,12 +30,30 @@ async function init(){
 
     build_process.on('close',() => {
         console.log("Build process completed");
-        const buld_dir = path.join(code_dir,"dist");
-        const filesArray = fs.readdirSync(buld_dir,{recursive : true});
-        filesArray.filter(file => fs.statSync(file).isFile()).forEach(file => {
-            AwsService.getInstance().upload(file);
+        const build_dir = path.join(code_dir,"dist");
+        console.log("build_dir -> " + build_dir);
+        const filesArray = fs.readdirSync(build_dir,{recursive : true});
+        console.log(filesArray);
+
+        filesArray.filter(file => {
+            if(file.includes('.')){
+                return true;
+            }
+            return false;
+        }).forEach(file =>{
+            const fllePath = path.join(build_dir,file as string);
+            console.log(fllePath + " being uploaded");
+            AwsService.getInstance().upload(fllePath);
         });
     })
+}
+
+function getFilePath(file: string | Buffer): boolean{
+    try{
+        return fs.lstatSync(file).isFile();
+    }catch(e){
+        return false;
+    }
 }
 
 init();
