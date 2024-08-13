@@ -11,14 +11,6 @@ async function init(){
     const files = fs.existsSync(code_dir);
     console.log(files === true ? "The directory exists" : "The directory doesnot exits");
     const build_process = exec(`cd ${code_dir} && npm install && npm run build`); 
-    
-    exec('ls -al & cat .env', (err, stdout, stderr) => {
-        if (err) {
-          return;
-        }
-        console.log(`stdout: ${stdout}`);
-        console.log(`stderr: ${stderr}`);
-      });
 
     build_process.stdout?.on('data',(data) => {
         console.log("Data " + data.toString());
@@ -46,14 +38,6 @@ async function init(){
             AwsService.getInstance().upload(fllePath);
         });
     })
-}
-
-function getFilePath(file: string | Buffer): boolean{
-    try{
-        return fs.lstatSync(file).isFile();
-    }catch(e){
-        return false;
-    }
 }
 
 init();
