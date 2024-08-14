@@ -20,21 +20,18 @@ async function init(){
         console.log("Error",data.toString());
     })
 
-    build_process.on('close',() => {
+    build_process.on('close',async () => {
         console.log("Build process completed");
         const build_dir = path.join(code_dir,"dist");
-        console.log("build_dir -> " + build_dir);
         const filesArray = fs.readdirSync(build_dir,{recursive : true});
-        console.log(filesArray);
-
         filesArray.filter(file => {
             if(file.includes('.')){
                 return true;
             }
             return false;
-        }).forEach(file =>{
+        }).forEach((file) =>{
             const fllePath = path.join(build_dir,file as string);
-            console.log(fllePath + " being uploaded");
+            console.log(fllePath + " being uploaded....");
             AwsService.getInstance().upload(fllePath);
         });
     })

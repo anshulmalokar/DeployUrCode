@@ -1,6 +1,7 @@
-import { PutObjectCommand } from "@aws-sdk/client-s3";
 import fs from "fs";
 import ms from "mime-types";
+import { PutObjectCommand,GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3Client } from "../client/S3Client";
 import { AWS_BUCKET_NAME } from "../config/config";
 export class AwsService{
@@ -15,6 +16,16 @@ export class AwsService{
             return new AwsService();
         }
         return this._instance
+    }
+
+    public async getPreSignedUrl(key: string){
+        const getObjectParams = {
+            Bucket: AWS_BUCKET_NAME,
+            Key: key
+        }
+        const command = new GetObjectCommand(getObjectParams);
+        const url = await getSignedUrl(s3Client, command);
+        return url;
     }
 
     public async upload(file: string | Buffer){
